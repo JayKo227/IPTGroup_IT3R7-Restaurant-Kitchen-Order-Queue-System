@@ -297,7 +297,7 @@ export default function OrdersPage() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-kitchen-muted mb-1">Table Number *</label>
-                <input type="number" min="1" value={form.table_number} onChange={e => setForm(p => ({ ...p, table_number: e.target.value }))}
+                <input type="text" inputMode="numeric" value={form.table_number} onChange={e => setForm(p => ({ ...p, table_number: e.target.value.replace(/[^0-9]/g, '') }))}
                   className="w-full bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors"
                   placeholder="1" />
                 {errors.table_number && <p className="text-red-400 text-xs mt-1">{errors.table_number}</p>}
