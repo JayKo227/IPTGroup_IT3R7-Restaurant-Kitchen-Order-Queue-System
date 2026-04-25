@@ -5,6 +5,15 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 })
 
+// Add Authorization header to requests if token exists
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Token ${token}`
+  }
+  return config
+})
+
 export default api
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -48,6 +57,20 @@ export interface Order {
   order_items: OrderItem[]
 }
 
+export interface UserProfile {
+  id: number
+  email: string
+  first_name: string
+  last_name: string
+  full_name: string
+  address: string
+  age: number | null
+  birthday: string | null
+  phone: string
+  role: string
+  date_joined: string
+}
+
 export interface DashboardStats {
   total_orders: number
   pending: number
@@ -58,6 +81,30 @@ export interface DashboardStats {
 }
 
 // ─── API CALLS ────────────────────────────────────────────────────────────────
+
+// Auth
+export const login = (email: string, password: string) =>
+  api.post<{ token: string; user: UserProfile }>('/auth/login/', { email, password })
+
+export const logout = () => api.post('/auth/logout/')
+
+export const register = (data: {
+  email: string
+  password: string
+  password2: string
+  first_name: string
+  last_name: string
+  address?: string
+  age?: number
+  birthday?: string
+  phone?: string
+  role?: string
+}) => api.post<{ token: string; user: UserProfile }>('/auth/register/', data)
+
+export const getProfile = () => api.get<UserProfile>('/auth/profile/')
+
+export const updateProfile = (data: Partial<UserProfile>) =>
+  api.patch<UserProfile>('/auth/profile/', data)
 
 // Menu Items
 export const getMenuItems = () => api.get<MenuItem[]>('/menu-items/')

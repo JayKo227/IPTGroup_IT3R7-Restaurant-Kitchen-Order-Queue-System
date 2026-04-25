@@ -1,15 +1,64 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils import timezone
 
 
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+
+class User(AbstractBaseUser, PermissionsMixin):
+    email      = models.EmailField(unique=True)
+    first_name = models.CharField(max_length=100)
+    last_name  = models.CharField(max_length=100)
+    address    = models.TextField(blank=True, default='')
+    age        = models.PositiveIntegerField(null=True, blank=True)
+    birthday   = models.DateField(null=True, blank=True)
+    phone      = models.CharField(max_length=20, blank=True, default='')
+    role       = models.CharField(
+        max_length=20,
+        choices=[('admin', 'Admin'), ('staff', 'Staff'), ('chef', 'Chef')],
+        default='staff'
+    )
+    is_active  = models.BooleanField(default=True)
+    is_staff   = models.BooleanField(default=False)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    objects = UserManager()
+
+    USERNAME_FIELD  = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} <{self.email}>"
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    class Meta:
+        ordering = ['first_name']
+
+
+# ─── Keep existing models ──────────────────────────────────────────────────────
+
 class MenuItem(models.Model):
-    """Represents a dish/item available on the menu."""
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    estimated_prep_time = models.PositiveIntegerField(
-        help_text="Estimated preparation time in minutes", default=10
-    )
+    estimated_prep_time = models.PositiveIntegerField(default=10)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -21,42 +70,30 @@ class MenuItem(models.Model):
 
 
 class Order(models.Model):
-    """Represents a customer order with a kitchen queue status."""
-
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
+        ('pending',   'Pending'),
         ('preparing', 'Preparing'),
-        ('ready', 'Ready'),
+        ('ready',     'Ready'),
         ('completed', 'Completed'),
         ('cancelled', 'Cancelled'),
     ]
 
-    table_number = models.PositiveIntegerField()
+    table_number  = models.PositiveIntegerField()
     customer_name = models.CharField(max_length=100, blank=True, default='')
-    status = models.CharField(
-        max_length=20, choices=STATUS_CHOICES, default='pending'
-    )
-    notes = models.TextField(blank=True, default='')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    started_at = models.DateTimeField(
-        null=True, blank=True,
-        help_text="When cooking started"
-    )
-    completed_at = models.DateTimeField(
-        null=True, blank=True,
-        help_text="When the order was completed or cancelled"
-    )
+    status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    notes         = models.TextField(blank=True, default='')
+    created_at    = models.DateTimeField(auto_now_add=True)
+    updated_at    = models.DateTimeField(auto_now=True)
+    started_at    = models.DateTimeField(null=True, blank=True)
+    completed_at  = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"Order #{self.id} - Table {self.table_number} [{self.status}]"
 
     @property
     def preparation_time(self):
-        """Returns total preparation time in seconds, or None if not complete."""
         if self.started_at and self.completed_at:
-            delta = self.completed_at - self.started_at
-            return int(delta.total_seconds())
+            return int((self.completed_at - self.started_at).total_seconds())
         return None
 
     @property
@@ -64,29 +101,22 @@ class Order(models.Model):
         return sum(item.subtotal for item in self.order_items.all())
 
     def advance_status(self):
-        """Advance the order to the next logical status."""
-        transitions = {
-            'pending': 'preparing',
-            'preparing': 'ready',
-            'ready': 'completed',
-        }
+        transitions = {'pending': 'preparing', 'preparing': 'ready', 'ready': 'completed'}
         new_status = transitions.get(self.status)
         if new_status is None:
-            raise ValueError(f"Cannot advance order from status '{self.status}'")
-
+            raise ValueError(f"Cannot advance from '{self.status}'")
         now = timezone.now()
         if new_status == 'preparing':
             self.started_at = now
-        elif new_status in ('completed',):
+        elif new_status == 'completed':
             self.completed_at = now
-
         self.status = new_status
         self.save()
         return self
 
     def cancel(self):
         if self.status in ('completed', 'cancelled'):
-            raise ValueError(f"Cannot cancel an order with status '{self.status}'")
+            raise ValueError(f"Cannot cancel a '{self.status}' order")
         self.status = 'cancelled'
         self.completed_at = timezone.now()
         self.save()
@@ -97,14 +127,9 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    """A single line item within an order."""
-    order = models.ForeignKey(
-        Order, related_name='order_items', on_delete=models.CASCADE
-    )
-    menu_item = models.ForeignKey(
-        MenuItem, related_name='order_items', on_delete=models.PROTECT
-    )
-    quantity = models.PositiveIntegerField(default=1)
+    order                = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
+    menu_item            = models.ForeignKey(MenuItem, related_name='order_items', on_delete=models.PROTECT)
+    quantity             = models.PositiveIntegerField(default=1)
     special_instructions = models.TextField(blank=True, default='')
 
     def __str__(self):
