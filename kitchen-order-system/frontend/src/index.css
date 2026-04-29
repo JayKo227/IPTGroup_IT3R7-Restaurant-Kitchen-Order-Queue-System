@@ -2,6 +2,38 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+  --body: #0f0e0c;
+  --surface: #1a1815;
+  --card: #161615;
+  --border: #2e2b25;
+  --text: #e8e2d9;
+  --muted: #9d9690;
+  --muted-strong: #6b6660;
+  --accent: #16a34a;
+  --accent-soft: rgba(16, 163, 74, 0.16);
+  --input: #11100d;
+  --input-border: #2e2b25;
+  --panel: #1a1815;
+}
+
+.theme-light {
+  color-scheme: light;
+  --body: #f3faf6;
+  --surface: #ffffff;
+  --card: #f8fffb;
+  --border: #d1e7d5;
+  --text: #111827;
+  --muted: #6b7280;
+  --muted-strong: #4b5563;
+  --accent: #16a34a;
+  --accent-soft: rgba(16, 185, 129, 0.12);
+  --input: #ffffff;
+  --input-border: #d1d5db;
+  --panel: #f8fafc;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -9,10 +41,56 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #0f0e0c;
-  color: #e8e2d9;
+  background-color: var(--body);
+  color: var(--text);
   font-family: 'DM Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.theme-dark .bg-white {
+  background-color: var(--card) !important;
+}
+.theme-dark .bg-gray-50 {
+  background-color: #11100d !important;
+}
+.theme-dark .border-gray-200 {
+  border-color: #2e2b25 !important;
+}
+.theme-dark .text-gray-800,
+.theme-dark .text-gray-900 {
+  color: #e8e2d9 !important;
+}
+.theme-dark .text-gray-500,
+.theme-dark .text-gray-400,
+.theme-dark .text-gray-600 {
+  color: #c7c5bf !important;
+}
+.theme-dark .bg-\[\#f0f7f4\] {
+  background-color: #0f0e0c !important;
+}
+
+.theme-light .bg-\[\#1a1815\],
+.theme-light .bg-\[\#211f1b\],
+.theme-light .bg-\[\#0f0e0c\] {
+  background-color: #ffffff !important;
+}
+.theme-light .bg-\[\#0f0e0c\] {
+  background-color: #f8fafc !important;
+}
+.theme-light .border-\[\#2e2b25\],
+.theme-light .border-\[\#3e3b35\] {
+  border-color: #d1d5db !important;
+}
+.theme-light .hover\:bg-\[\#2e2b25\]:hover,
+.theme-light .hover\:bg-\[\#3e3b35\]:hover {
+  background-color: #e5e7eb !important;
+}
+.theme-light .text-kitchen-text,
+.theme-light .text-kitchen-muted,
+.theme-light .text-kitchen-text-dim,
+.theme-light .text-gray-50,
+.theme-light .text-gray-100 {
+  color: #111827 !important;
 }
 
 /* Custom scrollbar */
@@ -27,7 +105,7 @@ body {
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #f97316;
+  background: #16a34a;
 }
 
 /* Status badge animations */

@@ -22,6 +22,8 @@ export default function MenuPage() {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState<MenuItem | null>(null)
   const [form, setForm] = useState<FormState>(empty)
+  const [menuImage, setMenuImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<MenuItem | null>(null)
   const [errors, setErrors] = useState<Record<string, string>>({})
@@ -39,10 +41,20 @@ export default function MenuPage() {
 
   useEffect(() => { fetchItems() }, [])
 
-  const openCreate = () => { setEditing(null); setForm(empty); setErrors({}); setShowModal(true) }
+  const openCreate = () => {
+    setEditing(null)
+    setForm(empty)
+    setMenuImage(null)
+    setImagePreview(null)
+    setErrors({})
+    setShowModal(true)
+  }
+
   const openEdit = (item: MenuItem) => {
     setEditing(item)
-    setForm({ name: item.name, description: item.description, price: item.price, estimated_prep_time: String(item.estimated_prep_time), is_available: item.is_available })
+    setForm({ name: item.name, description: item.description, price: String(item.price), estimated_prep_time: String(item.estimated_prep_time), is_available: item.is_available })
+    setMenuImage(null)
+    setImagePreview(item.image_url || null)
     setErrors({})
     setShowModal(true)
   }
@@ -60,7 +72,13 @@ export default function MenuPage() {
     e.preventDefault()
     if (!validate()) return
     setSubmitting(true)
-    const payload = { ...form, price: parseFloat(form.price), estimated_prep_time: parseInt(form.estimated_prep_time) }
+    const payload = new FormData()
+    payload.append('name', form.name.trim())
+    payload.append('description', form.description.trim())
+    payload.append('price', parseFloat(form.price).toString())
+    payload.append('estimated_prep_time', parseInt(form.estimated_prep_time).toString())
+    payload.append('is_available', String(form.is_available))
+    if (menuImage) payload.append('image', menuImage)
     try {
       if (editing) {
         await updateMenuItem(editing.id, payload)
@@ -91,8 +109,14 @@ export default function MenuPage() {
       await deleteMenuItem(deleteTarget.id)
       toast.success(`"${deleteTarget.name}" deleted`)
       fetchItems()
-    } catch {
-      toast.error('Failed to delete menu item')
+    } catch (err: any) {
+      const data = err?.response?.data
+      if (data && typeof data === 'object') {
+        const message = data.error || Object.values(data)[0]
+        toast.error(typeof message === 'string' ? message : 'Failed to delete menu item')
+      } else {
+        toast.error('Failed to delete menu item')
+      }
     }
     setDeleteTarget(null)
   }
@@ -136,19 +160,26 @@ export default function MenuPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map(item => (
             <div key={item.id} className={`bg-[#1a1815] border rounded-xl p-5 transition-all ${item.is_available ? 'border-[#2e2b25] hover:border-[#3e3b35]' : 'border-[#2e2b25] opacity-60'}`}>
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h3 className="font-medium text-kitchen-text">{item.name}</h3>
-                  <p className="text-kitchen-muted text-xs mt-0.5 line-clamp-2">{item.description || 'No description'}</p>
-                </div>
-                <span className="font-mono font-semibold text-kitchen-accent ml-2 text-sm">₱{item.price}</span>
+              <div className="overflow-hidden rounded-3xl mb-4 bg-[#0f0e0c]">
+              {item.image_url ? (
+                <img src={item.image_url} alt={item.name} className="w-full h-40 object-cover" />
+              ) : (
+                <div className="h-40 flex items-center justify-center text-kitchen-muted text-sm">No photo available</div>
+              )}
+            </div>
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-medium text-kitchen-text">{item.name}</h3>
+                <p className="text-kitchen-muted text-xs mt-0.5 line-clamp-2">{item.description || 'No description'}</p>
               </div>
+              <span className="font-mono font-semibold text-kitchen-accent ml-2 text-sm">₱{item.price}</span>
+            </div>
               <div className="flex items-center gap-2 text-xs text-kitchen-muted mb-4">
                 <Clock size={12} />
                 <span>{item.estimated_prep_time} min prep</span>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => toggleAvailability(item)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all ${item.is_available ? 'bg-green-500/10 text-green-400 border border-green-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
+                <button onClick={() => toggleAvailability(item)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all ${item.is_available ? 'bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'}`}>
                   {item.is_available ? <ToggleRight size={14} /> : <ToggleLeft size={14} />}
                   {item.is_available ? 'Available' : 'Unavailable'}
                 </button>
@@ -183,6 +214,21 @@ export default function MenuPage() {
                 rows={2} className="w-full bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors resize-none"
                 placeholder="Short description..." />
             </div>
+            <div>
+              <label className="block text-xs font-medium text-kitchen-muted mb-1">Photo</label>
+              <input type="file" accept="image/*" onChange={e => {
+                const file = e.target.files?.[0] ?? null
+                setMenuImage(file)
+                setImagePreview(file ? URL.createObjectURL(file) : editing?.image_url || null)
+              }}
+                className="block w-full text-sm text-kitchen-text file:bg-[#1f1d19] file:border-0 file:text-kitchen-text file:rounded-lg file:px-3 file:py-2"
+              />
+              {imagePreview && (
+                <div className="mt-3 rounded-2xl overflow-hidden bg-[#0f0e0c]">
+                  <img src={imagePreview} alt="Preview" className="w-full h-36 object-cover" />
+                </div>
+              )}
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-xs font-medium text-kitchen-muted mb-1">Price (₱) *</label>
@@ -200,7 +246,7 @@ export default function MenuPage() {
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="avail" checked={form.is_available} onChange={e => setForm(p => ({ ...p, is_available: e.target.checked }))}
-                className="w-4 h-4 accent-orange-500" />
+                className="w-4 h-4 accent-kitchen-accent" />
               <label htmlFor="avail" className="text-sm text-kitchen-text-dim">Available for ordering</label>
             </div>
             <div className="flex gap-3 pt-2">

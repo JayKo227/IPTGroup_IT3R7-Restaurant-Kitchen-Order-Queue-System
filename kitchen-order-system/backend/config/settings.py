@@ -2,9 +2,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-kitchen-order-secret-key-change-in-production')
 
@@ -88,7 +87,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:3000",
 ]
-CORS_ALLOW_ALL_ORIGINS = DEBUG  # Allow all in development
+CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # ─── DRF ───────────────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
@@ -106,3 +105,17 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ],
 }
+
+# ─── EMAIL ─────────────────────────────────────────────────────────────────────
+EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS       = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ['true', '1', 'yes']
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '').strip()
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').strip()
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend' if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', f'KitchenOQ <{EMAIL_HOST_USER or "no-reply@kitchenoq.com"}>')
+FRONTEND_URL        = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
+# ─── MEDIA FILES ───────────────────────────────────────────────────────────────
+MEDIA_URL  = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

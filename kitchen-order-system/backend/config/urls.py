@@ -1,14 +1,16 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 @api_view(['GET'])
 def api_root(request):
     return Response({
-        'dashboard': 'http://127.0.0.1:8000/api/dashboard/',
+        'dashboard':  'http://127.0.0.1:8000/api/dashboard/',
         'menu-items': 'http://127.0.0.1:8000/api/menu-items/',
-        'orders': 'http://127.0.0.1:8000/api/orders/',
+        'orders':     'http://127.0.0.1:8000/api/orders/',
     })
 
 urlpatterns = [
@@ -17,4 +19,4 @@ urlpatterns = [
     path('api/', api_root, name='api-root'),
     path('api/', include('kitchen.urls')),
     path('api-auth/', include('rest_framework.urls')),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

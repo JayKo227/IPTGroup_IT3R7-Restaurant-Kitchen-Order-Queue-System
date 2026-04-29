@@ -5,9 +5,11 @@ import { ChefHat, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
 interface Props {
   onLogin: (token: string) => void
+  onGoRegister: () => void
+  onGoForgot: () => void
 }
 
-export default function LoginPage({ onLogin }: Props) {
+export default function LoginPage({ onLogin, onGoRegister, onGoForgot }: Props) {
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
   const [showPw, setShowPw]     = useState(false)
@@ -40,54 +42,66 @@ export default function LoginPage({ onLogin }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f7f4] flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-green-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <ChefHat size={32} className="text-white" />
+    <div className="min-h-screen bg-[color:var(--body)] flex items-center justify-center py-10 px-6">
+      <div className="w-full max-w-xl mx-auto">
+        <div className="text-center mb-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-[color:var(--accent)] rounded-3xl flex items-center justify-center mb-5 shadow-2xl shadow-[rgba(16,163,74,0.18)]">
+            <ChefHat size={36} className="text-white" />
           </div>
-          <h1 className="font-display text-4xl tracking-widest text-green-900">
-            KITCHEN<span className="text-blue-700">OQ</span>
+          <h1 className="font-display text-5xl md:text-6xl tracking-[0.35em] text-[color:var(--accent)]">
+            KITCHEN<span className="text-[color:var(--text)]">OQ</span>
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Restaurant Kitchen Order Queue System</p>
+          <p className="text-gray-400 text-base md:text-lg mt-3 max-w-md mx-auto">
+            Restaurant Kitchen Order Queue System
+          </p>
         </div>
 
-        <div className="bg-white border border-green-200 rounded-2xl shadow-lg p-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6">Sign in to your account</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="bg-[color:var(--surface)] border border-[color:var(--border)] rounded-[2rem] shadow-2xl p-10 md:p-12 flex flex-col items-center">
+          <h2 className="text-2xl md:text-3xl font-semibold text-[color:var(--text)] mb-8 text-center">
+            Sign in to your account
+          </h2>
+          <form onSubmit={handleSubmit} className="space-y-6 w-full">
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Email Address</label>
               <div className="relative">
-                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="email" value={email}
                   onChange={e => { setEmail(e.target.value); setErrors(p => ({ ...p, email: '' })) }}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-4 py-2.5 text-gray-800 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                  className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-[1rem] pl-14 pr-4 py-4 text-[0.95rem] text-[color:var(--text)] focus:outline-none focus:border-[color:var(--accent)] transition-colors"
                   placeholder="you@example.com" />
               </div>
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-500 text-sm mt-2">{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Password</label>
               <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type={showPw ? 'text' : 'password'} value={password}
                   onChange={e => { setPassword(e.target.value); setErrors(p => ({ ...p, password: '' })) }}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-10 pr-10 py-2.5 text-gray-800 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                  className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-[1rem] pl-14 pr-14 py-4 text-[0.95rem] text-[color:var(--text)] focus:outline-none focus:border-[color:var(--accent)] transition-colors"
                   placeholder="••••••••" />
                 <button type="button" onClick={() => setShowPw(!showPw)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-200">
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              {errors.password && <p className="text-red-500 text-sm mt-2">{errors.password}</p>}
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full py-3 bg-green-700 hover:bg-green-800 disabled:opacity-50 text-white rounded-lg font-medium transition-all mt-2">
+              className="w-full py-4 bg-[color:var(--accent)] hover:bg-[color:var(--accent)]/90 disabled:opacity-50 text-white rounded-[1rem] font-semibold text-base transition-all">
               {loading ? 'Signing in…' : 'Sign In'}
             </button>
           </form>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-base text-gray-400">
+            <button type="button" onClick={onGoForgot} className="font-medium text-[color:var(--accent)] hover:text-[color:var(--accent)]/90 text-left sm:text-left">
+              Forgot password?
+            </button>
+            <button type="button" onClick={onGoRegister} className="font-medium text-[color:var(--accent)] hover:text-[color:var(--accent)]/90 text-left sm:text-right">
+              Create account
+            </button>
+          </div>
         </div>
       </div>
     </div>

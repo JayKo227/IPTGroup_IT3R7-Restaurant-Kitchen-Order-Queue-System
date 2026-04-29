@@ -3,7 +3,7 @@ import type { OrderStatus } from '../api'
 
 const config: Record<OrderStatus, { label: string; cls: string; dot: string }> = {
   pending:   { label: 'Pending',   cls: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',  dot: 'bg-yellow-400' },
-  preparing: { label: 'Preparing', cls: 'bg-orange-500/10 text-orange-400 border-orange-500/30 status-preparing', dot: 'bg-orange-400' },
+  preparing: { label: 'Preparing', cls: 'bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30 status-preparing', dot: 'bg-kitchen-accent' },
   ready:     { label: 'Ready',     cls: 'bg-green-500/10 text-green-400 border-green-500/30',     dot: 'bg-green-400' },
   completed: { label: 'Completed', cls: 'bg-blue-500/10 text-blue-400 border-blue-500/30',        dot: 'bg-blue-400' },
   cancelled: { label: 'Cancelled', cls: 'bg-red-500/10 text-red-400 border-red-500/30',           dot: 'bg-red-400' },

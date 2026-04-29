@@ -3,21 +3,24 @@ from . import views
 
 urlpatterns = [
     # ── Auth ──────────────────────────────────────────────────────────────────
-    path('auth/login/',    views.LoginView.as_view(),    name='login'),
-    path('auth/logout/',   views.LogoutView.as_view(),   name='logout'),
-    path('auth/register/', views.RegisterView.as_view(), name='register'),
-    path('auth/profile/',  views.ProfileView.as_view(),  name='profile'),
+    path('auth/login/',    views.LoginView.as_view(),           name='login'),
+    path('auth/logout/',   views.LogoutView.as_view(),          name='logout'),
+    path('auth/register/', views.RegisterView.as_view(),        name='register'),
+    path('auth/activate/', views.ActivateAccountView.as_view(), name='activate'),
+    path('auth/password-reset/', views.PasswordResetRequestView.as_view(), name='password_reset'),
+    path('auth/password-reset-confirm/', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
+    path('auth/profile/',  views.ProfileView.as_view(),         name='profile'),
 
     # ── Dashboard ─────────────────────────────────────────────────────────────
     path('dashboard/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
 
     # ── Menu Items ────────────────────────────────────────────────────────────
-    path('menu-items/',      views.MenuItemListView.as_view(),   name='menu-item-list'),
+    path('menu-items/',          views.MenuItemListView.as_view(),   name='menu-item-list'),
     path('menu-items/<int:pk>/', views.MenuItemDetailView.as_view(), name='menu-item-detail'),
 
     # ── Orders ────────────────────────────────────────────────────────────────
-    path('orders/',              views.OrderListView.as_view(),   name='order-list'),
-    path('orders/<int:pk>/',     views.OrderDetailView.as_view(), name='order-detail'),
+    path('orders/',                 views.OrderListView.as_view(),   name='order-list'),
+    path('orders/<int:pk>/',        views.OrderDetailView.as_view(), name='order-detail'),
     path('orders/<int:pk>/status/', views.OrderStatusView.as_view(), name='order-status'),
 
     # ── Order Items ───────────────────────────────────────────────────────────

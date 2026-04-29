@@ -232,7 +232,7 @@ export default function OrdersPage() {
         <Filter size={14} className="text-kitchen-muted mr-1" />
         {filters.map(f => (
           <button key={f.val} onClick={() => setFilter(f.val)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f.val ? 'bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30' : 'text-kitchen-muted hover:text-kitchen-text hover:bg-[#2e2b25] border border-transparent'}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${filter === f.val ? 'bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30' : 'text-kitchen-muted hover:text-kitchen-text hover:bg-[color:var(--border)] border border-transparent'}`}>
             {f.label}
           </button>
         ))}
@@ -240,22 +240,22 @@ export default function OrdersPage() {
 
       {/* Orders table */}
       {orders.length === 0 ? (
-        <div className="bg-[#1a1815] border border-[#2e2b25] rounded-xl p-12 text-center">
+        <div className="bg-[color:var(--surface)] border border-[color:var(--border)] rounded-xl p-12 text-center">
           <p className="text-kitchen-muted">No orders found for this filter.</p>
         </div>
       ) : (
-        <div className="bg-[#1a1815] border border-[#2e2b25] rounded-xl overflow-hidden">
+        <div className="bg-[color:var(--surface)] border border-[color:var(--border)] rounded-xl overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#2e2b25]">
+              <tr className="border-b border-[color:var(--border)]">
                 {['Order', 'Table', 'Customer', 'Items', 'Total', 'Status', 'Time', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-kitchen-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#2e2b25]">
+            <tbody className="divide-y divide-[color:var(--border)]">
               {orders.map(order => (
-                <tr key={order.id} className="hover:bg-[#211f1b] transition-colors">
+                <tr key={order.id} className="bg-[color:var(--surface)] hover:bg-[color:var(--border)] transition-colors">
                   <td className="px-4 py-3 font-mono text-kitchen-accent font-medium">#{order.id}</td>
                   <td className="px-4 py-3 text-kitchen-text">{order.table_number}</td>
                   <td className="px-4 py-3 text-kitchen-text-dim">{order.customer_name || '—'}</td>
@@ -265,7 +265,7 @@ export default function OrdersPage() {
                   <td className="px-4 py-3 text-kitchen-muted text-xs font-mono">{elapsed(order.created_at)}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setViewOrder(order)} className="p-1.5 rounded-lg hover:bg-[#2e2b25] text-kitchen-muted hover:text-kitchen-text transition-all" title="View">
+                      <button onClick={() => setViewOrder(order)} className="p-1.5 rounded-lg hover:bg-[color:var(--border)] text-kitchen-muted hover:text-kitchen-text transition-all" title="View">
                         <Eye size={14} />
                       </button>
                       {nextStatusLabel(order.status) && (
@@ -298,21 +298,21 @@ export default function OrdersPage() {
               <div>
                 <label className="block text-xs font-medium text-kitchen-muted mb-1">Table Number *</label>
                 <input type="text" inputMode="numeric" value={form.table_number} onChange={e => setForm(p => ({ ...p, table_number: e.target.value.replace(/[^0-9]/g, '') }))}
-                  className="w-full bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors"
+                  className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors"
                   placeholder="1" />
                 {errors.table_number && <p className="text-red-400 text-xs mt-1">{errors.table_number}</p>}
               </div>
               <div>
                 <label className="block text-xs font-medium text-kitchen-muted mb-1">Customer Name</label>
                 <input value={form.customer_name} onChange={e => setForm(p => ({ ...p, customer_name: e.target.value }))}
-                  className="w-full bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors"
+                  className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors"
                   placeholder="Optional" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-kitchen-muted mb-1">Notes</label>
               <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
-                rows={2} className="w-full bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors resize-none"
+                rows={2} className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent transition-colors resize-none"
                 placeholder="Allergies, special requests…" />
             </div>
 
@@ -328,29 +328,43 @@ export default function OrdersPage() {
               {menuItems.length === 0 && <p className="text-yellow-400 text-xs">Add menu items first before creating an order.</p>}
               {errors.items && <p className="text-red-400 text-xs mb-2">{errors.items}</p>}
               <div className="space-y-2">
-                {form.items.map((item, idx) => (
-                  <div key={idx} className="flex gap-2 items-start">
-                    <select value={item.menu_item} onChange={e => updateFormItem(idx, 'menu_item', Number(e.target.value))}
-                      className="flex-1 bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent">
-                      {menuItems.filter(m => m.is_available).map(m => (
-                        <option key={m.id} value={m.id}>{m.name} — ₱{m.price}</option>
-                      ))}
-                    </select>
-                    <input type="number" min="1" value={item.quantity} onChange={e => updateFormItem(idx, 'quantity', Number(e.target.value))}
-                      className="w-16 bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-2 py-2 text-kitchen-text text-sm text-center focus:outline-none focus:border-kitchen-accent" />
-                    <input value={item.special_instructions} onChange={e => updateFormItem(idx, 'special_instructions', e.target.value)}
-                      className="flex-1 bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent"
-                      placeholder="Note (optional)" />
-                    <button type="button" onClick={() => removeFormItem(idx)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                ))}
+                {form.items.map((item, idx) => {
+                  const selected = menuItems.find(m => m.id === item.menu_item)
+                  return (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <div className="w-16 h-16 rounded-2xl overflow-hidden bg-[color:var(--panel)] border border-[color:var(--border)]">
+                        {selected?.image_url ? (
+                          <img src={selected.image_url} alt={selected.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-kitchen-muted uppercase tracking-wider">No image</div>
+                        )}
+                      </div>
+                      <div className="flex-1 space-y-2">
+                        <select value={item.menu_item} onChange={e => updateFormItem(idx, 'menu_item', Number(e.target.value))}
+                          className="w-full bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent">
+                          {menuItems.filter(m => m.is_available).map(m => (
+                            <option key={m.id} value={m.id}>{m.name} — ₱{m.price}</option>
+                          ))}
+                        </select>
+                        <div className="flex gap-2">
+                          <input type="number" min="1" value={item.quantity} onChange={e => updateFormItem(idx, 'quantity', Number(e.target.value))}
+                            className="w-24 bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-2 py-2 text-kitchen-text text-sm text-center focus:outline-none focus:border-kitchen-accent" />
+                          <input value={item.special_instructions} onChange={e => updateFormItem(idx, 'special_instructions', e.target.value)}
+                            className="flex-1 bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent"
+                            placeholder="Note (optional)" />
+                          <button type="button" onClick={() => removeFormItem(idx)} className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
             <div className="flex gap-3 pt-2">
-              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2.5 border border-[#2e2b25] text-kitchen-muted rounded-lg hover:border-[#3e3b35] hover:text-kitchen-text transition-all text-sm">
+              <button type="button" onClick={() => setShowCreate(false)} className="flex-1 py-2.5 border border-[color:var(--border)] text-kitchen-muted rounded-lg hover:border-[color:var(--border)] hover:text-kitchen-text transition-all text-sm">
                 Cancel
               </button>
               <button type="submit" disabled={submitting} className="flex-1 py-2.5 bg-kitchen-accent hover:bg-kitchen-accent-dim disabled:opacity-50 text-white rounded-lg transition-all font-medium text-sm">
@@ -367,26 +381,26 @@ export default function OrdersPage() {
           <div className="space-y-4">
             {/* Info */}
             <div className="grid grid-cols-2 gap-3 text-sm">
-              <div className="bg-[#0f0e0c] rounded-lg p-3">
+              <div className="bg-[color:var(--panel)] rounded-lg p-3">
                 <span className="text-kitchen-muted text-xs">Table</span>
                 <p className="text-kitchen-text font-medium mt-0.5">{viewOrder.table_number}</p>
               </div>
-              <div className="bg-[#0f0e0c] rounded-lg p-3">
+              <div className="bg-[color:var(--panel)] rounded-lg p-3">
                 <span className="text-kitchen-muted text-xs">Customer</span>
                 <p className="text-kitchen-text font-medium mt-0.5">{viewOrder.customer_name || '—'}</p>
               </div>
-              <div className="bg-[#0f0e0c] rounded-lg p-3">
+              <div className="bg-[color:var(--panel)] rounded-lg p-3">
                 <span className="text-kitchen-muted text-xs">Status</span>
                 <div className="mt-1"><StatusBadge status={viewOrder.status} /></div>
               </div>
-              <div className="bg-[#0f0e0c] rounded-lg p-3">
+              <div className="bg-[color:var(--panel)] rounded-lg p-3">
                 <span className="text-kitchen-muted text-xs">Total</span>
                 <p className="text-kitchen-accent font-mono font-medium mt-0.5">₱{viewOrder.total_price}</p>
               </div>
             </div>
 
             {viewOrder.notes && (
-              <div className="bg-[#0f0e0c] rounded-lg p-3 text-sm">
+              <div className="bg-[color:var(--panel)] rounded-lg p-3 text-sm">
                 <span className="text-kitchen-muted text-xs">Notes</span>
                 <p className="text-kitchen-text mt-0.5">{viewOrder.notes}</p>
               </div>
@@ -404,10 +418,19 @@ export default function OrdersPage() {
               <h4 className="text-xs font-medium text-kitchen-muted uppercase tracking-wider mb-2">Items</h4>
               <div className="space-y-1">
                 {viewOrder.order_items.map(item => (
-                  <div key={item.id} className="flex items-center justify-between bg-[#0f0e0c] rounded-lg px-3 py-2 text-sm">
-                    <span className="text-kitchen-text">{item.quantity}× {item.menu_item_name}</span>
-                    {item.special_instructions && <span className="text-kitchen-muted text-xs italic mx-2">{item.special_instructions}</span>}
-                    <div className="flex items-center gap-2 ml-auto">
+                  <div key={item.id} className="flex items-center gap-3 bg-[color:var(--panel)] rounded-lg px-3 py-2 text-sm">
+                    <div className="w-14 h-14 rounded-2xl overflow-hidden bg-[#0f0e0c] border border-[color:var(--border)]">
+                      {item.menu_item_image ? (
+                        <img src={item.menu_item_image} alt={item.menu_item_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-kitchen-muted uppercase tracking-wider">No image</div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-kitchen-text font-medium truncate">{item.quantity}× {item.menu_item_name}</p>
+                      {item.special_instructions && <p className="text-kitchen-muted text-xs italic truncate">{item.special_instructions}</p>}
+                    </div>
+                    <div className="flex items-center gap-2">
                       <span className="text-kitchen-accent font-mono text-xs">₱{item.subtotal}</span>
                       {!['completed', 'cancelled'].includes(viewOrder.status) && (
                         <button onClick={() => handleRemoveItem(item.id)} className="text-kitchen-muted hover:text-red-400 transition-colors">
@@ -426,14 +449,14 @@ export default function OrdersPage() {
                 <h4 className="text-xs font-medium text-kitchen-muted uppercase tracking-wider mb-2">Add Item</h4>
                 <div className="flex gap-2">
                   <select value={addItemMenuId} onChange={e => setAddItemMenuId(e.target.value)}
-                    className="flex-1 bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent">
+                    className="flex-1 bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-3 py-2 text-kitchen-text text-sm focus:outline-none focus:border-kitchen-accent">
                     <option value="">Select item…</option>
                     {menuItems.filter(m => m.is_available).map(m => (
                       <option key={m.id} value={m.id}>{m.name} — ₱{m.price}</option>
                     ))}
                   </select>
                   <input type="number" min="1" value={addItemQty} onChange={e => setAddItemQty(e.target.value)}
-                    className="w-16 bg-[#0f0e0c] border border-[#2e2b25] rounded-lg px-2 py-2 text-kitchen-text text-sm text-center focus:outline-none focus:border-kitchen-accent" />
+                    className="w-16 bg-[color:var(--panel)] border border-[color:var(--border)] rounded-lg px-2 py-2 text-kitchen-text text-sm text-center focus:outline-none focus:border-kitchen-accent" />
                   <button onClick={handleAddItem} disabled={!addItemMenuId || addingItem}
                     className="px-4 py-2 bg-kitchen-accent hover:bg-kitchen-accent-dim disabled:opacity-40 text-white rounded-lg text-sm transition-all">
                     {addingItem ? '…' : 'Add'}
@@ -443,7 +466,7 @@ export default function OrdersPage() {
             )}
 
             {/* Actions */}
-            <div className="flex gap-2 pt-2 border-t border-[#2e2b25]">
+            <div className="flex gap-2 pt-2 border-t border-[color:var(--border)]">
               {nextStatusLabel(viewOrder.status) && (
                 <button onClick={() => handleAdvance(viewOrder)} className="flex-1 py-2.5 bg-kitchen-accent hover:bg-kitchen-accent-dim text-white rounded-lg transition-all font-medium text-sm">
                   → {nextStatusLabel(viewOrder.status)}

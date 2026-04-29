@@ -2,7 +2,6 @@ import axios from 'axios'
 
 const api = axios.create({
   baseURL: '/api',
-  headers: { 'Content-Type': 'application/json' },
 })
 
 // Add Authorization header to requests if token exists
@@ -24,9 +23,11 @@ export interface MenuItem {
   id: number
   name: string
   description: string
-  price: string
+  price: string | number
   estimated_prep_time: number
   is_available: boolean
+  image?: string | null
+  image_url?: string | null
   created_at: string
 }
 
@@ -36,6 +37,7 @@ export interface OrderItem {
   menu_item: number
   menu_item_name: string
   menu_item_price: string
+  menu_item_image?: string | null
   quantity: number
   special_instructions: string
   subtotal: string
@@ -61,6 +63,7 @@ export interface UserProfile {
   id: number
   email: string
   first_name: string
+  middle_name: string | null
   last_name: string
   full_name: string
   address: string
@@ -68,6 +71,8 @@ export interface UserProfile {
   birthday: string | null
   phone: string
   role: string
+  profile_picture: string | null
+  profile_picture_url: string | null
   date_joined: string
 }
 
@@ -88,28 +93,39 @@ export const login = (email: string, password: string) =>
 
 export const logout = () => api.post('/auth/logout/')
 
+export const requestPasswordReset = (email: string) =>
+  api.post('/auth/password-reset/', { email })
+
+export const confirmPasswordReset = (data: {
+  uid: string
+  token: string
+  new_password: string
+  new_password2: string
+}) => api.post('/auth/password-reset-confirm/', data)
+
 export const register = (data: {
   email: string
   password: string
   password2: string
   first_name: string
+  middle_name?: string
   last_name: string
   address?: string
   age?: number
   birthday?: string
   phone?: string
   role?: string
-}) => api.post<{ token: string; user: UserProfile }>('/auth/register/', data)
+} | FormData) => api.post<{ detail: string; email: string }>('/auth/register/', data)
 
 export const getProfile = () => api.get<UserProfile>('/auth/profile/')
 
-export const updateProfile = (data: Partial<UserProfile>) =>
+export const updateProfile = (data: Partial<UserProfile> | FormData) =>
   api.patch<UserProfile>('/auth/profile/', data)
 
 // Menu Items
 export const getMenuItems = () => api.get<MenuItem[]>('/menu-items/')
-export const createMenuItem = (data: Partial<MenuItem>) => api.post<MenuItem>('/menu-items/', data)
-export const updateMenuItem = (id: number, data: Partial<MenuItem>) => api.patch<MenuItem>(`/menu-items/${id}/`, data)
+export const createMenuItem = (data: Partial<MenuItem> | FormData) => api.post<MenuItem>('/menu-items/', data)
+export const updateMenuItem = (id: number, data: Partial<MenuItem> | FormData) => api.patch<MenuItem>(`/menu-items/${id}/`, data)
 export const deleteMenuItem = (id: number) => api.delete(`/menu-items/${id}/`)
 
 // Orders

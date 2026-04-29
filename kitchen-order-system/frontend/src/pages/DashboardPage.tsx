@@ -79,85 +79,98 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
         {[
           { label: 'Total Orders', val: stats?.total_orders, icon: TrendingUp, color: 'text-kitchen-accent' },
           { label: 'Pending',      val: stats?.pending,      icon: Clock,       color: 'text-yellow-400' },
-          { label: 'Preparing',    val: stats?.preparing,    icon: ChefHat,     color: 'text-orange-400' },
+          { label: 'Preparing',    val: stats?.preparing,    icon: ChefHat,     color: 'text-kitchen-accent' },
           { label: 'Ready',        val: stats?.ready,        icon: Bell,        color: 'text-green-400' },
           { label: 'Completed',    val: stats?.completed,    icon: CheckCircle, color: 'text-blue-400' },
         ].map(({ label, val, icon: Icon, color }) => (
-          <div key={label} className="bg-[#1a1815] border border-[#2e2b25] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-kitchen-muted text-xs font-medium uppercase tracking-wider">{label}</span>
-              <Icon size={16} className={color} />
+          <div key={label} className="bg-[#1a1815] border border-[#2e2b25] rounded-[1.5rem] p-6">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-kitchen-muted text-sm font-medium uppercase tracking-wider">{label}</span>
+              <Icon size={20} className={color} />
             </div>
-            <span className="font-display text-4xl tracking-wide text-kitchen-text">{val ?? 0}</span>
+            <span className="font-display text-5xl tracking-wide text-kitchen-text">{val ?? 0}</span>
           </div>
         ))}
       </div>
 
       {/* Active Kitchen Queue */}
       <div>
-        <div className="flex items-center gap-2 mb-4">
-          <h2 className="font-display text-2xl tracking-wider text-kitchen-text">ACTIVE QUEUE</h2>
-          <span className="px-2 py-0.5 bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30 rounded-md text-xs font-mono">
-            {activeOrders.length} orders
-          </span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+          <div className="flex items-center gap-3">
+            <h2 className="font-display text-3xl md:text-4xl tracking-wider text-kitchen-text">ACTIVE QUEUE</h2>
+            <span className="px-3 py-1 bg-kitchen-accent/10 text-kitchen-accent border border-kitchen-accent/30 rounded-full text-sm font-mono">
+              {activeOrders.length} orders
+            </span>
+          </div>
         </div>
 
         {activeOrders.length === 0 ? (
-          <div className="bg-[#1a1815] border border-[#2e2b25] rounded-xl p-12 text-center">
-            <ChefHat size={40} className="text-kitchen-muted mx-auto mb-3" />
-            <p className="text-kitchen-muted">No active orders. Kitchen is clear!</p>
+          <div className="bg-[#1a1815] border border-[#2e2b25] rounded-[1.5rem] p-16 text-center">
+            <ChefHat size={48} className="text-kitchen-muted mx-auto mb-4" />
+            <p className="text-kitchen-muted text-lg">No active orders. Kitchen is clear!</p>
           </div>
         ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {activeOrders.map(order => (
-              <div key={order.id} className="bg-[#1a1815] border border-[#2e2b25] rounded-xl p-5 hover:border-[#3e3b35] transition-all">
+              <div key={order.id} className="bg-[#1a1815] border border-[#2e2b25] rounded-[1.5rem] p-6 hover:border-[#3e3b35] transition-all">
                 {/* Header */}
-                <div className="flex items-start justify-between mb-3">
+                <div className="flex items-start justify-between mb-4 gap-4">
                   <div>
-                    <span className="font-display text-xl tracking-wider text-kitchen-text">ORDER #{order.id}</span>
-                    <p className="text-kitchen-muted text-xs mt-0.5">Table {order.table_number}{order.customer_name ? ` · ${order.customer_name}` : ''}</p>
+                    <span className="font-display text-2xl tracking-wider text-kitchen-text">ORDER #{order.id}</span>
+                    <p className="text-kitchen-muted text-sm mt-1">Table {order.table_number}{order.customer_name ? ` · ${order.customer_name}` : ''}</p>
                   </div>
                   <StatusBadge status={order.status} />
                 </div>
 
                 {/* Items */}
-                <div className="space-y-1 mb-3 min-h-[48px]">
+                <div className="flex gap-2 mb-4">
                   {order.order_items.slice(0, 3).map(item => (
-                    <div key={item.id} className="flex justify-between text-sm">
+                    <div key={item.id} className="w-16 h-16 rounded-3xl overflow-hidden bg-[#0f0e0c] border border-[#2e2b25]">
+                      {item.menu_item_image ? (
+                        <img src={item.menu_item_image} alt={item.menu_item_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] text-kitchen-muted uppercase tracking-wider">No image</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-2 mb-4 min-h-[60px]">
+                  {order.order_items.slice(0, 3).map(item => (
+                    <div key={item.id} className="flex justify-between text-base">
                       <span className="text-kitchen-text-dim">{item.quantity}× {item.menu_item_name}</span>
-                      <span className="text-kitchen-muted font-mono text-xs">₱{item.subtotal}</span>
+                      <span className="text-kitchen-muted font-mono text-sm">₱{item.subtotal}</span>
                     </div>
                   ))}
                   {order.order_items.length > 3 && (
-                    <span className="text-kitchen-muted text-xs">+{order.order_items.length - 3} more items</span>
+                    <span className="text-kitchen-muted text-sm">+{order.order_items.length - 3} more items</span>
                   )}
                 </div>
 
                 {/* Footer */}
-                <div className="flex items-center justify-between pt-3 border-t border-[#2e2b25] mb-3">
-                  <span className="text-xs text-kitchen-muted font-mono">{elapsed(order.created_at)}</span>
-                  <span className="text-kitchen-accent font-mono font-medium text-sm">₱{order.total_price}</span>
+                <div className="flex items-center justify-between pt-3 border-t border-[#2e2b25] mb-4">
+                  <span className="text-sm text-kitchen-muted font-mono">{elapsed(order.created_at)}</span>
+                  <span className="text-kitchen-accent font-mono font-semibold text-base">₱{order.total_price}</span>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-3">
                   {order.status !== 'completed' && order.status !== 'cancelled' && (
                     <button
                       onClick={() => setConfirm({ type: 'advance', order })}
-                      className="flex-1 py-2 bg-kitchen-accent hover:bg-kitchen-accent-dim text-white text-xs font-medium rounded-lg transition-all"
+                      className="flex-1 py-3 bg-kitchen-accent hover:bg-kitchen-accent-dim text-white text-base font-medium rounded-[1rem] transition-all"
                     >
                       → {nextStatus(order.status)}
                     </button>
                   )}
                   <button
                     onClick={() => setConfirm({ type: 'cancel', order })}
-                    className="px-3 py-2 border border-red-500/30 text-red-400 hover:bg-red-500/10 text-xs rounded-lg transition-all"
+                    className="w-full sm:w-auto px-4 py-3 border border-red-500/30 text-red-400 hover:bg-red-500/10 text-base rounded-[1rem] transition-all"
                   >
-                    <XCircle size={14} />
+                    <XCircle size={16} />
                   </button>
                 </div>
               </div>
