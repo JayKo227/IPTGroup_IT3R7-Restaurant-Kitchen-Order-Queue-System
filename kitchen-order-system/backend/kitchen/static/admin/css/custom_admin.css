@@ -1,0 +1,512 @@
+/* Light admin theme with green accents */
+body, html {
+    background: #eff3f7 !important;
+    color: #0f172a !important;
+    min-height: 100%;
+}
+
+#header, #branding, #footer, .module, .dashboard, .app-module, #content, .inline-related, .grp-module, .grp-group, .grp-wrap, .field-box, .form-row, .related-widget-wrapper, .inline-group, .module table, .result-list, .filter, #side-nav, .app-list, .breadcrumbs, .submit-row, .object-tools, .module caption, .module legend, .filter legend, .filter h3 {
+    background: #ffffff !important;
+    border-color: #d6e5ef !important;
+    color: #0f172a !important;
+}
+
+body, html, p, h1, h2, h3, h4, h5, h6, label, legend, th, td, a, .module caption, .module legend, .form-row label, .help, .breadcrumbs, .result-list thead th, .result-list td, .result-list th, .app-list li a, #side-nav a, .filter label, .filter legend {
+    color: #0f172a !important;
+}
+
+#header {
+    background: #ffffff !important;
+    border-bottom: 1px solid #dae4ef !important;
+}
+
+#header #branding, #branding {
+    background: transparent !important;
+}
+
+#site-name a {
+    color: #15803d !important;
+    font-weight: 700;
+}
+
+#site-name a:hover {
+    color: #0f172a !important;
+}
+
+#site-name .site-tagline {
+    color: #475569 !important;
+    margin: 4px 0 0;
+    font-size: 0.95rem;
+}
+
+#content-main, #changelist, .module, .dashboard {
+    box-shadow: 0 2px 16px rgba(15, 23, 42, 0.08);
+}
+
+a, .module a, .breadcrumb a, .submit-row a, .object-tools a, .addlink, .app-list li a, .filter a {
+    color: #0f766e !important;
+}
+
+a:hover, .module a:hover, .breadcrumb a:hover, .submit-row a:hover, .object-tools a:hover, .addlink:hover, .app-list li a:hover, .filter a:hover {
+    color: #064e3b !important;
+}
+
+#dashboard h2, .module h2, h1, h2, label, .help, .field-box, .form-row label, .breadcrumbs, .module caption, .result-list thead th, .result-list td, .result-list th, .grp-module h2, .grp-collapse .grp-collapse-title {
+    color: #0f172a !important;
+}
+
+fieldset.module, .grp-group, .field-box, .form-row, .related-widget-wrapper, .inline-group, .module table, .result-list, .filter {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+}
+
+.module table, .result-list {
+    color: #0f172a !important;
+}
+
+.module table th, .result-list thead th, .results th {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.result-list tbody tr:nth-child(odd) {
+    background: #ffffff !important;
+}
+
+.result-list tbody tr:nth-child(even) {
+    background: #f8fbff !important;
+}
+
+.result-list tbody tr:hover {
+    background: #e6f7ed !important;
+}
+
+.result-list tbody th, .result-list tbody td, .module table td, .module table th {
+    color: #0f172a !important;
+}
+
+.result-list tbody td a, .module table td a, .module td a {
+    color: #15803d !important;
+}
+
+.result-list tbody td a:hover, .module table td a:hover, .module td a:hover {
+    color: #0f766e !important;
+}
+
+input, select, textarea, .vTextField, .vLargeTextField, .vDateField, .vTimeField, .vIntegerField, .vSmallIntegerField, .vPositiveIntegerField, .vDecimalField {
+    background: #f8fbff !important;
+    border: 1px solid #dbeafe !important;
+    color: #0f172a !important;
+    border-radius: 10px !important;
+}
+
+input::placeholder, textarea::placeholder, select::placeholder {
+    color: #94a3b8 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 1px rgba(52, 211, 153, .25);
+}
+
+#side-nav, .app-list, .app-list li, .app-list li a {
+    background: #ffffff !important;
+    color: #0f172a !important;
+}
+
+#side-nav .model a, .app-list li a {
+    color: #0f172a !important;
+}
+
+#side-nav .model a:hover, .app-list li a:hover {
+    background: #d1fae5 !important;
+    color: #0f766e !important;
+}
+
+#user-tools, .breadcrumbs, .module caption, .result-list thead th, .object-tools a, .filter legend, .filter label {
+    color: #0f172a !important;
+}
+
+#user-tools form#logout-form button,
+#user-tools form#logout-form button *,
+#user-tools a {
+    color: #15803d !important;
+    background: transparent !important;
+    border: none !important;
+    text-decoration: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+}
+
+#user-tools form#logout-form button:hover,
+#user-tools a:hover {
+    color: #0f766e !important;
+    text-decoration: underline !important;
+}
+
+/* remove built-in dark mode toggle and force light mode */
+.color-theme-toggle,
+#dark-mode-toggle,
+.theme-toggle,
+button.theme-toggle,
+#theme-toggle,
+.admin-color-toggle,
+.color-theme-toggle button,
+.theme-switcher,
+.color-theme-toggle * {
+    display: none !important;
+}
+
+body.dark-mode,
+body.theme-dark,
+body[data-theme='dark'],
+body[data-theme="dark"] *,
+.dark-mode *,
+.theme-dark * {
+    background: unset !important;
+    color: #0f172a !important;
+}
+
+body.dark-mode #container,
+body.theme-dark #container,
+body[data-theme='dark'] #container,
+body.dark-mode #content,
+body.theme-dark #content,
+body[data-theme='dark'] #content {
+    background: #fff !important;
+}
+
+.addlink,
+.addlink *,
+.object-tools .addlink,
+.app-list li .addlink,
+.module .addlink,
+.inline-related .addlink,
+.grp-addlink,
+.grp-addlink * {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.5em 0.9em !important;
+    min-height: 34px !important;
+    min-width: 64px !important;
+    border-radius: 9999px !important;
+    text-decoration: none !important;
+.object-tools .addlink:hover,
+.app-list li .addlink:hover,
+.module .addlink:hover,
+.inline-related .addlink:hover,
+.grp-addlink:hover,
+.grp-addlink *:hover {
+    background: #16a34a !important;
+    background-image: none !important;
+    color: #ffffff !important;
+}
+
+.submit-row input,
+.submit-row .button,
+.button,
+.addlink,
+.deletelink,
+.button.default,
+.button-secondary {
+    background: #22c55e !important;
+    border-color: #16a34a !important;
+    color: #ffffff !important;
+    border-radius: 9999px !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.submit-row input:hover,
+.submit-row .button:hover,
+.button:hover,
+.addlink:hover,
+.deletelink:hover,
+.button.default:hover,
+.button-secondary:hover {
+    background: #16a34a !important;
+    color: #ffffff !important;
+}
+
+#footer, #content-main .form-row, .grp-collapse .grp-collapse-title, .grp-inline-related, .grp-footer, .field-box, .form-row, .module table {
+    border-color: #e2e8f0 !important;
+}
+
+.errornote, .success, .warning, .messages {
+    background: #ecfdf5 !important;
+    border-color: #a7f3d0 !important;
+    color: #0f172a !important;
+}
+
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+    background-color: #f8fbff !important;
+    color: #0f172a !important;
+}
+
+#content-main .module, .dashboard, .module, .grp-module, .grp-group {
+    color: #0f172a !important;
+}
+
+.flexible-search input[type=text], .search-form input[type=text], .search-form input {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-color: #dbeafe !important;
+}
+
+.filter {
+    background: #ffffff !important;
+}
+
+.filter h3, .filter label, .filter fieldset, .filter legend {
+    color: #0f172a !important;
+}
+
+/* Custom admin login page styling */
+html, body.login {
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.login {
+    background: linear-gradient(180deg, #f8fafc 0%, #e2f0ea 100%) !important;
+}
+
+body.login #header,
+body.login #branding,
+body.login #footer,
+body.login .breadcrumbs,
+body.login .nav-breadcrumbs,
+body.login #user-tools,
+body.login .nav-global,
+body.login .nav-sidebar {
+    display: none !important;
+}
+
+body.login #container,
+body.login #main,
+body.login #content-start,
+body.login #content,
+body.login .content {
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+body.login #container {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 100vh !important;
+    padding: 40px 0 !important;
+}
+
+body.login #main,
+body.login #content-start,
+body.login #content,
+body.login .content {
+    display: block !important;
+}
+
+body.login #content {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+body.login .content {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.admin-login-shell {
+    width: min(720px, calc(100% - 40px)) !important;
+    max-width: 720px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+body.login #content-start,
+body.login #content,
+body.login .content,
+body.login .admin-login-shell {
+    box-sizing: border-box !important;
+}
+
+.admin-login-card {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 38px;
+    box-shadow: 0 32px 100px rgba(15, 23, 42, 0.15);
+    padding: 50px 46px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.admin-login-brand {
+    text-align: center;
+    margin-bottom: 34px;
+}
+
+.admin-login-brand h1 {
+    margin: 0;
+    font-size: 2.5rem;
+    letter-spacing: 0.18em;
+    color: #0f172a;
+}
+
+.admin-login-brand p {
+    margin: 10px auto 0;
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 28rem;
+}
+
+.admin-login-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 24px;
+    background: #16a34a;
+    color: #ffffff;
+    font-size: 1.8rem;
+}
+
+.admin-login-title {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    margin: 0 0 30px;
+}
+
+.admin-login-form {
+    display: grid !important;
+    width: 100%;
+    gap: 22px;
+}
+
+.admin-login-form .login-field {
+    width: 100% !important;
+}
+
+.admin-login-form label,
+.admin-login-form .login-field label {
+    font-weight: 600;
+    color: #0f172a;
+    display: block !important;
+    margin-bottom: 10px !important;
+}
+
+.password-toggle {
+    position: relative;
+    width: 100% !important;
+}
+
+.password-toggle input {
+    padding-right: 52px !important;
+    padding-left: 16px !important;
+}
+
+.password-toggle-button {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.1rem;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    border-radius: 9999px;
+    padding: 0;
+}
+
+.password-toggle-button:hover,
+.password-toggle-button:focus {
+    color: #0f172a;
+}
+
+.password-toggle-button:focus {
+    outline: 2px solid rgba(34, 197, 94, 0.35);
+    outline-offset: 2px;
+}
+
+.admin-login-form input[type="text"],
+.admin-login-form input[type="email"],
+.admin-login-form input[type="password"] {
+    width: 100% !important;
+    padding: 16px !important;
+    background: #f8fbff !important;
+    border: 1px solid #dbeafe !important;
+    color: #0f172a !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    text-align: left !important;
+}
+
+.admin-login-form input[type="text"]::placeholder,
+.admin-login-form input[type="email"]::placeholder,
+.admin-login-form input[type="password"]::placeholder {
+    color: #94a3b8 !important;
+}
+
+.admin-login-form input:focus {
+    border-color: #34d399 !important;
+    box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.15) !important;
+}
+
+.submit-row {
+    margin-top: 8px;
+}
+
+.admin-login-card .button,
+.admin-login-card .submit-row input {
+    width: 100%;
+    border-radius: 9999px !important;
+    padding: 16px 18px !important;
+    font-size: 1rem !important;
+    background: #22c55e !important;
+    border-color: #16a34a !important;
+}
+
+.admin-login-card .button:hover,
+.admin-login-card .submit-row input:hover {
+    background: #16a34a !important;
+}
+
+.admin-login-links {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    font-size: 0.95rem;
+    color: #64748b;
+}
+
+.admin-login-links a {
+    color: #15803d !important;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.admin-login-error {
+    margin-bottom: 10px;
+}

@@ -1,0 +1,301 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans "Sign in" %} | Kitchen OQ{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        body.login #header,
+        body.login #branding,
+        body.login #user-tools,
+        body.login .breadcrumbs,
+        body.login .nav-breadcrumbs,
+        body.login #site-name {
+            display: none !important;
+        }
+
+        body.login #container {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            min-height: 100vh !important;
+            padding: 40px 20px !important;
+        }
+
+        body.login .admin-login-container {
+            width: min(600px, calc(100% - 40px)) !important;
+            max-width: 600px !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+        }
+
+        body.login .admin-login-brand {
+            margin-bottom: 48px !important;
+        }
+
+        body.login .admin-login-logo {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 80px !important;
+            height: 80px !important;
+            margin: 0 auto 24px !important;
+            border-radius: 20px !important;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+            font-size: 2rem !important;
+            position: relative !important;
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.2) !important;
+        }
+
+        body.login .admin-login-brand h1 {
+            font-size: 2.6rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.12em !important;
+            color: #16a34a !important;
+            margin: 0 0 8px !important;
+        }
+
+        body.login .admin-login-oq {
+            color: #0f172a !important;
+        }
+
+        body.login .admin-login-brand p {
+            font-size: 0.95rem !important;
+            color: #94a3b8 !important;
+            margin: 0 !important;
+        }
+
+        body.login .admin-login-card {
+            background: #ffffff !important;
+            border-radius: 24px !important;
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1) !important;
+            padding: 48px 40px !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
+        }
+
+        body.login .admin-login-title {
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+            color: #0f172a !important;
+            margin: 0 0 32px !important;
+        }
+
+        body.login .admin-login-form {
+            display: grid !important;
+            width: 100% !important;
+            gap: 24px !important;
+        }
+
+        body.login .login-field {
+            width: 100% !important;
+            margin-bottom: 2px !important;
+        }
+
+        body.login .login-field label {
+            font-weight: 600 !important;
+            color: #6b7280 !important;
+            display: block !important;
+            margin-bottom: 12px !important;
+            font-size: 0.95rem !important;
+            text-align: left !important;
+        }
+
+        body.login .input-icon-wrapper,
+        body.login .password-toggle {
+            position: relative !important;
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        body.login .input-icon-left {
+            position: absolute !important;
+            left: 18px !important;
+            font-size: 1.3rem !important;
+            color: #a8b5c0 !important;
+            pointer-events: none !important;
+            display: block !important;
+            z-index: 1 !important;
+        }
+
+        body.login .admin-login-form input[type="text"],
+        body.login .admin-login-form input[type="email"],
+        body.login .admin-login-form input[type="password"] {
+            width: 100% !important;
+            padding: 22px 16px 22px 52px !important;
+            background: #e8eef8 !important;
+            border: 1.5px solid #c0d0e0 !important;
+            color: #0f172a !important;
+            border-radius: 16px !important;
+            font-size: 1.2rem !important;
+            box-sizing: border-box !important;
+            letter-spacing: 0.3px !important;
+            transition: all 0.2s ease !important;
+            min-height: 60px !important;
+        }
+
+        body.login .admin-login-form input[type="text"]::placeholder,
+        body.login .admin-login-form input[type="email"]::placeholder,
+        body.login .admin-login-form input[type="password"]::placeholder {
+            color: #b8c5d6 !important;
+        }
+
+        body.login .admin-login-form input:focus {
+            border-color: #a0b5d8 !important;
+            box-shadow: 0 0 0 3px rgba(160, 181, 216, 0.15) !important;
+            outline: none !important;
+        }
+
+        body.login .password-toggle input {
+            padding-right: 56px !important;
+            padding-left: 52px !important;
+        }
+
+        body.login .password-toggle-button {
+            position: absolute !important;
+            right: 16px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            border: none !important;
+            background: transparent !important;
+            cursor: pointer !important;
+            font-size: 1.1rem !important;
+            color: #a8b5c0 !important;
+            padding: 4px 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 34px !important;
+            height: 34px !important;
+            transition: color 0.2s ease !important;
+        }
+
+        body.login .password-toggle-button:hover {
+            color: #64748b !important;
+        }
+
+        body.login .submit-row {
+            margin-top: 24px !important;
+        }
+
+        body.login .admin-login-card .submit-row input {
+            width: 100% !important;
+            padding: 18px 24px !important;
+            background: #22c55e !important;
+            border: none !important;
+            color: #ffffff !important;
+            border-radius: 12px !important;
+            font-size: 1.05rem !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            min-height: 60px !important;
+        }
+
+        body.login .admin-login-card .submit-row input:hover {
+            background: #16a34a !important;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3) !important;
+        }
+
+        body.login .admin-login-error {
+            margin-bottom: 16px !important;
+        }
+    </style>
+{% endblock %}
+
+{% block bodyclass %}login{% endblock %}
+
+{% block usertools %}{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content %}
+<div class="admin-login-container">
+    <div class="admin-login-brand">
+        <div class="admin-login-logo">🧑‍🍳</div>
+        <h1>KITCHEN <span class="admin-login-oq">OQ</span></h1>
+        <p>Restaurant Kitchen Order Queue System</p>
+    </div>
+
+    <div class="admin-login-card">
+
+        <h2 class="admin-login-title">Sign in to your account</h2>
+
+        {% if form.errors and not form.non_field_errors %}
+            <div class="errornote admin-login-error">
+                <p>{% trans "Please correct the error below." %}</p>
+            </div>
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+                <div class="errornote admin-login-error">
+                    <p>{{ error }}</p>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form action="{{ app_path }}" method="post" id="login-form" class="admin-login-form">
+            {% csrf_token %}
+            <div class="login-field">
+                <label for="id_username">{% trans "Email Address" %}</label>
+                <div class="input-icon-wrapper">
+                    <span class="input-icon-left">✉️</span>
+                    {{ form.username }}
+                </div>
+                {{ form.username.errors }}
+            </div>
+
+            <div class="login-field">
+                <label for="id_password">{% trans "Password" %}</label>
+                <div class="password-toggle">
+                    <span class="input-icon-left">🔒</span>
+                    {{ form.password }}
+                    <button type="button" class="password-toggle-button" aria-label="{% trans "Show password" %}">👁</button>
+                </div>
+                {{ form.password.errors }}
+            </div>
+
+            {% if next %}
+                <input type="hidden" name="next" value="{{ next }}" />
+            {% endif %}
+
+            <div class="submit-row">
+                <input type="submit" value="{% trans "Sign in" %}" class="button" />
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Set placeholders
+    const usernameInput = document.getElementById('id_username');
+    const passwordInput = document.getElementById('id_password');
+    
+    if (usernameInput) {
+        usernameInput.placeholder = 'you@example.com';
+    }
+    if (passwordInput) {
+        passwordInput.placeholder = '••••••••';
+    }
+
+    // Password toggle
+    var toggle = document.querySelector('.password-toggle-button');
+    if (!toggle) return;
+    var input = toggle.closest('.password-toggle').querySelector('input');
+    if (!input) return;
+
+    toggle.addEventListener('click', function () {
+        var isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        toggle.setAttribute('aria-label', isPassword ? '{% trans "Hide password" %}' : '{% trans "Show password" %}');
+        toggle.classList.toggle('active', isPassword);
+    });
+});
+</script>
+{% endblock %}

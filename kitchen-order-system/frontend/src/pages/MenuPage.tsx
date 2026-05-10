@@ -77,7 +77,7 @@ export default function MenuPage() {
     payload.append('description', form.description.trim())
     payload.append('price', parseFloat(form.price).toString())
     payload.append('estimated_prep_time', parseInt(form.estimated_prep_time).toString())
-    payload.append('is_available', String(form.is_available))
+    payload.append('is_available', form.is_available ? '1' : '0')
     if (menuImage) payload.append('image', menuImage)
     try {
       if (editing) {

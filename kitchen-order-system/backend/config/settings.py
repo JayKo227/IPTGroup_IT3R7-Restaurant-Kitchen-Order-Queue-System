@@ -2,6 +2,19 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
+# Monkey-patch Django BaseContext.__copy__ for Python 3.14 compatibility.
+# Django 4.2.30's default implementation uses copy(super()) which fails
+# under this Python version. This patch preserves context dicts correctly.
+from django.template.context import BaseContext
+
+def _patched_basecontext_copy(self):
+    duplicate = self.__class__.__new__(self.__class__)
+    duplicate.__dict__.update(self.__dict__)
+    duplicate.dicts = self.dicts[:]
+    return duplicate
+
+BaseContext.__copy__ = _patched_basecontext_copy
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / '.env')
 
@@ -40,7 +53,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -107,14 +120,21 @@ REST_FRAMEWORK = {
 }
 
 # ─── EMAIL ─────────────────────────────────────────────────────────────────────
+EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
 EMAIL_USE_TLS       = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ['true', '1', 'yes']
 EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '').strip()
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '').strip()
-EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend' if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD else 'django.core.mail.backends.console.EmailBackend'
-DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', f'KitchenOQ <{EMAIL_HOST_USER or "no-reply@kitchenoq.com"}>')
+DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', f'KitchenOQ <{EMAIL_HOST_USER or "noreply@kitchenoq.com"}>')
 FRONTEND_URL        = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
+# Email timeout configuration - properly passed to SMTP backend
+EMAIL_TIMEOUT = 30
+
+# Fallback to console backend only in DEBUG mode if no credentials provided
+if DEBUG and not (EMAIL_HOST_USER and EMAIL_HOST_PASSWORD):
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # ─── MEDIA FILES ───────────────────────────────────────────────────────────────
 MEDIA_URL  = '/media/'

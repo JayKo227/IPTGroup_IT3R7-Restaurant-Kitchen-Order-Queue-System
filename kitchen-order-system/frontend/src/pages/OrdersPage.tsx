@@ -45,9 +45,10 @@ export default function OrdersPage() {
     try {
       const res = await getOrders(filter === 'all' ? undefined : filter)
       setOrders(res.data)
-    } catch {
+      setLoading(false)
+    } catch (err: any) {
+      console.error('Error fetching orders:', err)
       toast.error('Failed to load orders')
-    } finally {
       setLoading(false)
     }
   }
@@ -86,24 +87,35 @@ export default function OrdersPage() {
     if (!validateCreate()) return
     setSubmitting(true)
     try {
-      await createOrder({
+      console.log('Creating order with data:', { 
         table_number: Number(form.table_number),
         customer_name: form.customer_name,
         notes: form.notes,
         items: form.items,
       })
+      const response = await createOrder({
+        table_number: Number(form.table_number),
+        customer_name: form.customer_name,
+        notes: form.notes,
+        items: form.items,
+      })
+      console.log('Order created successfully:', response.data)
       toast.success('Order created!')
       setShowCreate(false)
       setForm({ table_number: '', customer_name: '', notes: '', items: [] })
-      fetchOrders()
+      await fetchOrders()
     } catch (err: any) {
+      console.error('Error creating order:', err)
       const data = err?.response?.data
       if (data && typeof data === 'object') {
         const apiErrors: Record<string, string> = {}
         for (const [k, v] of Object.entries(data)) apiErrors[k] = Array.isArray(v) ? v[0] : String(v)
+        console.error('Validation errors:', apiErrors)
         setErrors(apiErrors)
+        toast.error(Object.values(apiErrors)[0] || 'Failed to create order')
       } else {
-        toast.error('Failed to create order')
+        console.error('Unexpected error:', err?.message || err)
+        toast.error('Failed to create order: ' + (err?.message || 'Unknown error'))
       }
     } finally {
       setSubmitting(false)
@@ -114,24 +126,32 @@ export default function OrdersPage() {
 
   const handleAdvance = async (order: Order) => {
     try {
+      console.log('Advancing order:', order.id)
       const res = await advanceOrderStatus(order.id)
+      console.log('Order advanced successfully:', res.data)
       toast.success(`Order #${order.id} advanced to ${res.data.status_display}`)
-      fetchOrders()
+      await fetchOrders()
       if (viewOrder?.id === order.id) setViewOrder(res.data)
-    } catch {
-      toast.error('Failed to advance order')
+    } catch (err: any) {
+      console.error('Error advancing order:', err)
+      const message = err?.response?.data?.error || err?.message || 'Failed to advance order'
+      toast.error(String(message))
     }
   }
 
   const handleCancel = async () => {
     if (!cancelTarget) return
     try {
+      console.log('Cancelling order:', cancelTarget.id)
       await cancelOrder(cancelTarget.id)
+      console.log('Order cancelled successfully')
       toast.success(`Order #${cancelTarget.id} cancelled`)
-      fetchOrders()
+      await fetchOrders()
       if (viewOrder?.id === cancelTarget.id) setViewOrder(null)
-    } catch {
-      toast.error('Failed to cancel order')
+    } catch (err: any) {
+      console.error('Error cancelling order:', err)
+      const message = err?.response?.data?.error || err?.message || 'Failed to cancel order'
+      toast.error(String(message))
     }
     setCancelTarget(null)
   }
@@ -139,12 +159,16 @@ export default function OrdersPage() {
   const handleDelete = async () => {
     if (!deleteTarget) return
     try {
+      console.log('Deleting order:', deleteTarget.id)
       await deleteOrder(deleteTarget.id)
+      console.log('Order deleted successfully')
       toast.success(`Order #${deleteTarget.id} deleted`)
-      fetchOrders()
+      await fetchOrders()
       if (viewOrder?.id === deleteTarget.id) setViewOrder(null)
-    } catch {
-      toast.error('Failed to delete order')
+    } catch (err: any) {
+      console.error('Error deleting order:', err)
+      const message = err?.response?.data?.error || err?.response?.data?.message || err?.message || 'Failed to delete order'
+      toast.error(String(message))
     }
     setDeleteTarget(null)
   }
@@ -155,11 +179,13 @@ export default function OrdersPage() {
     if (!viewOrder || !addItemMenuId) return
     setAddingItem(true)
     try {
+      console.log('Adding item to order:', { orderId: viewOrder.id, menuItemId: addItemMenuId, quantity: addItemQty })
       await addOrderItem(viewOrder.id, {
         menu_item: Number(addItemMenuId),
         quantity: Number(addItemQty),
         special_instructions: addItemNote,
       })
+      console.log('Item added successfully')
       toast.success('Item added to order')
       const res = await getOrders()
       const updated = res.data.find(o => o.id === viewOrder.id)
@@ -167,10 +193,11 @@ export default function OrdersPage() {
       setAddItemMenuId('')
       setAddItemQty('1')
       setAddItemNote('')
-      fetchOrders()
+      await fetchOrders()
     } catch (err: any) {
-      const msg = err?.response?.data?.menu_item?.[0] ?? err?.response?.data?.error ?? 'Failed to add item'
-      toast.error(msg)
+      console.error('Error adding item:', err)
+      const msg = err?.response?.data?.menu_item?.[0] ?? err?.response?.data?.error ?? err?.message ?? 'Failed to add item'
+      toast.error(String(msg))
     } finally {
       setAddingItem(false)
     }
@@ -179,14 +206,18 @@ export default function OrdersPage() {
   const handleRemoveItem = async (itemId: number) => {
     if (!viewOrder) return
     try {
+      console.log('Removing item from order:', { orderId: viewOrder.id, itemId })
       await deleteOrderItem(viewOrder.id, itemId)
+      console.log('Item removed successfully')
       toast.success('Item removed')
       const res = await getOrders()
       const updated = res.data.find(o => o.id === viewOrder.id)
       if (updated) setViewOrder(updated)
-      fetchOrders()
-    } catch {
-      toast.error('Failed to remove item')
+      await fetchOrders()
+    } catch (err: any) {
+      console.error('Error removing item:', err)
+      const message = err?.response?.data?.error || err?.message || 'Failed to remove item'
+      toast.error(String(message))
     }
   }
 
@@ -248,22 +279,35 @@ export default function OrdersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-[color:var(--border)]">
-                {['Order', 'Table', 'Customer', 'Items', 'Total', 'Status', 'Time', 'Actions'].map(h => (
+                {['Order', 'Preview', 'Table', 'Customer', 'Items', 'Total', 'Status', 'Time', 'Actions'].map(h => (
                   <th key={h} className="px-4 py-3 text-left text-xs font-medium text-kitchen-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-[color:var(--border)]">
-              {orders.map(order => (
-                <tr key={order.id} className="bg-[color:var(--surface)] hover:bg-[color:var(--border)] transition-colors">
-                  <td className="px-4 py-3 font-mono text-kitchen-accent font-medium">#{order.id}</td>
-                  <td className="px-4 py-3 text-kitchen-text">{order.table_number}</td>
-                  <td className="px-4 py-3 text-kitchen-text-dim">{order.customer_name || '—'}</td>
-                  <td className="px-4 py-3 text-kitchen-text-dim">{order.order_items.length} items</td>
-                  <td className="px-4 py-3 font-mono text-kitchen-accent text-xs">₱{order.total_price}</td>
-                  <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
-                  <td className="px-4 py-3 text-kitchen-muted text-xs font-mono">{elapsed(order.created_at)}</td>
-                  <td className="px-4 py-3">
+              {orders.map(order => {
+                const firstItem = order.order_items[0];
+                const itemImage = firstItem ? firstItem.menu_item_image : null;
+                const itemName = firstItem ? firstItem.menu_item_name : `Order ${order.id}`;
+                return (
+                  <tr key={order.id} className="bg-[color:var(--surface)] hover:bg-[color:var(--border)] transition-colors">
+                    <td className="px-4 py-3 font-mono text-kitchen-accent font-medium">#{order.id}</td>
+                    <td className="px-4 py-3">
+                      <div className="w-16 h-12 rounded-xl overflow-hidden bg-[color:var(--panel)] border border-[color:var(--border)]">
+                        {itemImage ? (
+                          <img src={itemImage} alt={itemName} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[10px] text-kitchen-muted uppercase tracking-wider">No image</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-kitchen-text">{order.table_number}</td>
+                    <td className="px-4 py-3 text-kitchen-text-dim">{order.customer_name || '—'}</td>
+                    <td className="px-4 py-3 text-kitchen-text-dim">{order.order_items.length} items</td>
+                    <td className="px-4 py-3 font-mono text-kitchen-accent text-xs">₱{order.total_price}</td>
+                    <td className="px-4 py-3"><StatusBadge status={order.status} /></td>
+                    <td className="px-4 py-3 text-kitchen-muted text-xs font-mono">{elapsed(order.created_at)}</td>
+                    <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
                       <button onClick={() => setViewOrder(order)} className="p-1.5 rounded-lg hover:bg-[color:var(--border)] text-kitchen-muted hover:text-kitchen-text transition-all" title="View">
                         <Eye size={14} />
@@ -284,7 +328,8 @@ export default function OrdersPage() {
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -410,6 +455,13 @@ export default function OrdersPage() {
               <div className="flex items-center gap-2 text-xs text-kitchen-muted">
                 <Clock size={12} />
                 <span>Prep time: {Math.floor(viewOrder.preparation_time / 60)}m {viewOrder.preparation_time % 60}s</span>
+              </div>
+            )}
+
+            {viewOrder.completed_at && (
+              <div className="bg-[color:var(--panel)] rounded-lg p-3 text-sm">
+                <span className="text-kitchen-muted text-xs">COMPLETED AT</span>
+                <p className="text-kitchen-text mt-0.5">{new Date(viewOrder.completed_at).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })}</p>
               </div>
             )}
 

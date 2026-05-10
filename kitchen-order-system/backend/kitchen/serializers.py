@@ -1,14 +1,15 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.core.mail import EmailMultiAlternatives, get_connection
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.conf import settings
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.auth.tokens import default_token_generator
-from smtplib import SMTPAuthenticationError
+from smtplib import SMTPAuthenticationError, SMTPException
+import socket
 from .models import User, MenuItem, Order, OrderItem
 
 
@@ -25,6 +26,75 @@ def get_frontend_url_from_context(context):
     if not frontend_url:
         frontend_url = 'http://localhost:5173'
     return frontend_url.rstrip('/')
+
+
+def send_email_safely(subject, user_email, context, template_name):
+    """
+    Safely send email with proper Gmail SMTP handling and timeout.
+    Raises ValidationError with helpful error messages on failure.
+    """
+    from django.core.mail.backends.smtp import EmailBackend as SMTPBackend
+    
+    html_content = render_to_string(template_name, context)
+    text_content = strip_tags(html_content)
+
+    msg = EmailMultiAlternatives(
+        subject=subject,
+        body=text_content,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user_email],
+    )
+    msg.attach_alternative(html_content, 'text/html')
+
+    try:
+        # Create SMTP backend with explicit timeout
+        connection = SMTPBackend(
+            host=settings.EMAIL_HOST,
+            port=settings.EMAIL_PORT,
+            username=settings.EMAIL_HOST_USER,
+            password=settings.EMAIL_HOST_PASSWORD,
+            use_tls=settings.EMAIL_USE_TLS,
+            timeout=settings.EMAIL_TIMEOUT,
+            fail_silently=False,
+        )
+        msg.connection = connection
+        msg.send(fail_silently=False)
+        return True
+    except SMTPAuthenticationError as e:
+        error_msg = str(e)
+        if 'invalid_grant' in error_msg or '535' in error_msg:
+            raise serializers.ValidationError({
+                'email': 'Gmail App Password is invalid or expired. Generate a new one at: https://myaccount.google.com/apppasswords'
+            })
+        raise serializers.ValidationError({
+            'email': f'Gmail authentication failed: {error_msg}. Check your Gmail account security settings.'
+        })
+    except SMTPException as e:
+        error_msg = str(e)
+        if 'timed out' in error_msg.lower() or 'timeout' in error_msg.lower():
+            raise serializers.ValidationError({
+                'email': 'Gmail SMTP connection timed out. Check your internet connection and firewall. Try again.'
+            })
+        raise serializers.ValidationError({
+            'email': f'SMTP error: {error_msg}. Check EMAIL_HOST, EMAIL_PORT, and EMAIL_USE_TLS settings.'
+        })
+    except socket.gaierror as e:
+        raise serializers.ValidationError({
+            'email': 'Cannot reach Gmail SMTP server. Check internet connection and DNS settings.'
+        })
+    except socket.timeout as e:
+        raise serializers.ValidationError({
+            'email': 'Gmail connection timed out (socket timeout). Check your internet connection.'
+        })
+    except Exception as e:
+        error_msg = str(e)
+        if 'timed out' in error_msg.lower() or 'timeout' in error_msg.lower():
+            raise serializers.ValidationError({
+                'email': 'Email service timed out. Check your network connection and try again.'
+            })
+        raise serializers.ValidationError({
+            'email': f'Failed to send email: {error_msg}'
+        })
 
 
 # ─── AUTH SERIALIZERS ──────────────────────────────────────────────────────────
@@ -119,41 +189,27 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         try:
-            self._send_activation_email(user)
-        except Exception:
-            pass
-        return user
-
-    def _send_activation_email(self, user):
-        uid             = urlsafe_base64_encode(force_bytes(user.pk))
-        token           = default_token_generator.make_token(user)
-        frontend_url    = get_frontend_url_from_context(self.context)
-        activation_link = f"{frontend_url}/activate/{uid}/{token}/"
-
-        context      = {'user': user, 'activation_link': activation_link}
-        html_content = render_to_string('emails/activation_email.html', context)
-        text_content = strip_tags(html_content)
-
-        msg = EmailMultiAlternatives(
-            subject    = 'Activate your KitchenOQ account',
-            body       = text_content,
-            from_email = settings.DEFAULT_FROM_EMAIL,
-            to         = [user.email],
-        )
-        msg.attach_alternative(html_content, 'text/html')
-        try:
-            msg.send(fail_silently=False)
-        except SMTPAuthenticationError:
+            uid             = urlsafe_base64_encode(force_bytes(user.pk))
+            token           = default_token_generator.make_token(user)
+            frontend_url    = get_frontend_url_from_context(self.context)
+            activation_link = f"{frontend_url}/activate/{uid}/{token}/"
+            context         = {'user': user, 'activation_link': activation_link}
+            
+            send_email_safely(
+                subject='Activate your KitchenOQ account',
+                user_email=user.email,
+                context=context,
+                template_name='emails/activation_email.html'
+            )
+        except serializers.ValidationError:
+            # Re-raise validation errors from email sending
+            raise
+        except Exception as e:
+            # Log other exceptions but don't fail the registration
             if settings.DEBUG:
-                console_connection = get_connection('django.core.mail.backends.console.EmailBackend')
-                msg.connection = console_connection
-                msg.send()
-            else:
-                raise serializers.ValidationError({
-                    'email': 'Gmail authentication failed. Use a valid Gmail address and Google App Password.'
-                })
-        except Exception as exc:
-            raise serializers.ValidationError({'email': f'Unable to send activation email: {exc}'})
+                print(f"Error sending activation email: {e}")
+        
+        return user
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -171,30 +227,15 @@ class PasswordResetRequestSerializer(serializers.Serializer):
         frontend_url = get_frontend_url_from_context(self.context)
         reset_link   = f"{frontend_url}/reset/{uid}/{token}/"
 
-        context      = {'user': user, 'reset_link': reset_link}
-        html_content = render_to_string('emails/password_reset_email.html', context)
-        text_content = strip_tags(html_content)
-
-        msg = EmailMultiAlternatives(
-            subject    = 'Reset your KitchenOQ password',
-            body       = text_content,
-            from_email = settings.DEFAULT_FROM_EMAIL,
-            to         = [user.email],
+        context = {'user': user, 'reset_link': reset_link}
+        
+        send_email_safely(
+            subject='Reset your KitchenOQ password',
+            user_email=user.email,
+            context=context,
+            template_name='emails/password_reset_email.html'
         )
-        msg.attach_alternative(html_content, 'text/html')
-        try:
-            msg.send(fail_silently=False)
-        except SMTPAuthenticationError:
-            if settings.DEBUG:
-                console_connection = get_connection('django.core.mail.backends.console.EmailBackend')
-                msg.connection = console_connection
-                msg.send()
-            else:
-                raise serializers.ValidationError({
-                    'email': 'Gmail authentication failed. Use a valid Gmail address and Google App Password.'
-                })
-        except Exception as exc:
-            raise serializers.ValidationError({'email': f'Unable to send reset email: {exc}'})
+        
         return user
 
 
